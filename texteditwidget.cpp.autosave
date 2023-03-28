@@ -1,0 +1,40 @@
+#include "texteditwidget.h"
+
+TextEditWidget::TextEditWidget(QWidget *parent) : QWidget(parent)
+{
+    ctlWidget = new QWidget(this);
+    notes = new QTextEdit(this);
+    finBtn = new QPushButton(ctlWidget);
+    finBtn->setText(QString(tr("完成")));
+    finBtn->setFlat(true);
+    timeLabel = new QLabel(ctlWidget);
+    timeLabel->setText(getCurrentDate());
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    QHBoxLayout *subLayout = new QHBoxLayout(ctlWidget);
+
+    layout->addWidget(notes);
+    layout->addWidget(ctlWidget);
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    subLayout->addWidget(timeLabel);
+    subLayout->addWidget(finBtn);
+    subLayout->setMargin(0);
+    subLayout->setSpacing(200);
+
+    this->show();
+}
+
+TextEditWidget::~TextEditWidget()
+{
+
+}
+
+void TextEditWidget::addNewItemData(int nRow, QString noteTitle)
+{
+
+}
+
+void TextEditWidget::onFinBtnCheck()
+{
+    
+}

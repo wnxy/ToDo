@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>380</width>
+    <height>450</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>我的小本子</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">font: 25 10pt &quot;Microsoft YaHei UI&quot;;</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QWidget" name="topWidget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="fixButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources.qrc">
+           <normaloff>:/Images/Resources/Images/fix.svg</normaloff>:/Images/Resources/Images/fix.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="ToDoWidget" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>4</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QListWidget" name="toDoList">
+         <property name="styleSheet">
+          <string notr="true">QListWidget
+{
+	background-color: transparent;
+}
+/*设置滚动条的基本样式*/
+QScrollBar:vertical
+{
+    width:6px;
+    background:rgba(0,0,0,0%);
+    margin:0px,0px,0px,0px;
+	/*留出9px给上面和下面的箭头*/
+    padding-top:9px;   
+    padding-bottom:9px;
+}
+QScrollBar::handle:vertical
+{
+    width:6px;
+    background:rgba(0,0,0,25%);
+	/*滚动条两端变成椭圆*/
+    border-radius:3px;  
+    min-height:20;
+}
+QScrollBar::handle:vertical:hover
+{
+    width:6px;
+	/*鼠标放到滚动条上的时候，颜色变深*/
+    background:rgba(0,0,0,50%);   
+    border-radius:3px;
+    min-height:20;
+}
+/*设置下箭头*/
+QScrollBar::add-line:vertical   
+{
+    height:9px;
+	width:8px;
+    border-image:url(:/Images/Resources/Images/down.svg);
+    subcontrol-position:bottom;
+}
+/*设置上箭头*/
+QScrollBar::sub-line:vertical   
+{
+    height:9px;
+	width:8px;
+    border-image:url(:/Images/Resources/Images/up.svg);
+    subcontrol-position:top;
+}
+/*当鼠标放到下箭头上的时候*/
+QScrollBar::add-line:vertical:hover   
+{
+    height:9px;
+	width:8px;
+    border-image:url(:/Images/Resources/Images/down_hover.svg);
+    subcontrol-position:bottom;
+}
+/*当鼠标放到上箭头上的时候*/
+QScrollBar::sub-line:vertical:hover  
+{
+    height:9px;
+	width:8px;
+    border-image:url(:/Images/Resources/Images/up_hover.svg);
+    subcontrol-position:top;
+}
+/*当滚动条滚动的时候，上面的部分和下面的部分*/
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical   
+{
+    background:rgba(0,0,0,10%);
+    border-radius:3px;
+}
+</string>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="ctlWidget" native="true">
+      <property name="styleSheet">
+       <string notr="true">background-color: rgba(97, 111, 118, 100);</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources.qrc">
+           <normaloff>:/Images/Resources/Images/more.svg</normaloff>:/Images/Resources/Images/more.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>17</width>
+           <height>17</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="addToBeDone">
+         <property name="styleSheet">
+          <string notr="true">background-color: transparent;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources.qrc">
+           <normaloff>:/Images/Resources/Images/addNote.svg</normaloff>:/Images/Resources/Images/addNote.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>18</width>
+           <height>18</height>
+          </size>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="Resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/Images">
+        <file>Resources/Images/addNote.svg</file>
+        <file>Resources/Images/sysIcon.ico</file>
+        <file>Resources/Images/more.svg</file>
+        <file>Resources/Images/down.svg</file>
+        <file>Resources/Images/up.svg</file>
+        <file>Resources/Images/down_hover.svg</file>
+        <file>Resources/Images/up_hover.svg</file>
+        <file>Resources/Images/selected.svg</file>
+        <file>Resources/Images/unselected.svg</file>
+        <file>Resources/Images/fix.svg</file>
+        <file>Resources/Images/delete.svg</file>
+    </qresource>
+    <qresource prefix="/Qss"/>
+    <qresource prefix="/">
+        <file>Resources/Qss/ScrollBarStyle.qss</file>
+    </qresource>
+</RCC>
