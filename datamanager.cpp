@@ -1,9 +1,11 @@
 #include "datamanager.h"
 
+QSqlDatabase *DataManager::notesDatabase = new QSqlDatabase();
+
 DataManager::DataManager()
 {
     // 建立一个QSqlDatabase对象，后续操作会使用这个对象
-    notesDatabase = new QSqlDatabase();
+//    notesDatabase = new QSqlDatabase();
     if(QSqlDatabase::contains(DATABASE_CONNECTTIONNAME))                         // 判断指定的连接是否存在
     {
         (*notesDatabase) = QSqlDatabase::database(DATABASE_CONNECTTIONNAME);     // 如果指定的连接存在，则直接返回这个连接
@@ -37,9 +39,8 @@ bool DataManager::openDatabase()
 {
     if(!notesDatabase->open())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to connect database." << notesDatabase->lastError();
-#endif
+        qWarning() << "Error: Failed to connect database." << notesDatabase->lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to connect database. %1").arg(notesDatabase->lastError().text()));
         return false;
     }
 
@@ -80,9 +81,8 @@ bool DataManager::createTable(const QString &tableName)
     query.prepare(createSql);
     if(!query.exec())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to create table." << query.lastError();
-#endif
+        qWarning() << "Error: Failed to create table." << query.lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to create table. %1").arg(query.lastError().text()));
         return false;
     }
     return true;
@@ -108,13 +108,10 @@ bool DataManager::insertData(const QString &tableName, Notes &note)
     query.addBindValue(note.noteTime);
     query.addBindValue(0);
 
-//    qDebug() << insertSql;
-
     if(!query.exec())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to insert data." << query.lastError();
-#endif
+        qWarning() << "Error: Failed to insert data." << query.lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to insert data. %1").arg(query.lastError().text()));
         return false;
     }
     return true;
@@ -144,9 +141,8 @@ bool DataManager::updateData(const QString &tableName, Notes &note, int id)
     query.addBindValue(id);
     if(!query.exec())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to update data." << query.lastError();
-#endif
+        qWarning() << "Error: Failed to update data." << query.lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to update data. %1").arg(query.lastError().text()));
         return false;
     }
     return true;
@@ -161,9 +157,8 @@ bool DataManager::updateState(const QString &tableName, int id, int isDone)
     query.addBindValue(id);
     if(!query.exec())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to update state." << query.lastError();
-#endif
+        qWarning() << "Error: Failed to update state." << query.lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to update state. %1").arg(query.lastError().text()));
         return false;
     }
     return true;
@@ -177,9 +172,8 @@ bool DataManager::queryData(const QString &tableNmae, Notes &note, int id)
     query.bindValue(":id", id);
     if(!query.exec())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to query data." << query.lastError();
-#endif
+        qWarning() << "Error: Failed to query data." << query.lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to query data. %1").arg(query.lastError().text()));
         return false;
     }
     else
@@ -204,9 +198,8 @@ bool DataManager::queryAllData(const QString &tableName, QVector<Notes *> &notes
     query.prepare(queryAllSql);
     if(!query.exec())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to query all data." << query.lastError();
-#endif
+        qWarning() << "Error: Failed to query all data." << query.lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to query all data. %1").arg(query.lastError().text()));
         return false;
     }
     QString title, context, time;
@@ -239,9 +232,8 @@ int DataManager::queryMaxID(const QString &tableName)
     query.prepare(queryMaxSql);
     if(!query.exec())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to query max id." << query.lastError();
-#endif
+        qWarning() << "Error: Failed to query max id." << query.lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to query max id. %1").arg(query.lastError().text()));
     }
     else
     {
@@ -261,9 +253,8 @@ bool DataManager::deleteData(const QString &tableName, int id)
     query.addBindValue(id);
     if(!query.exec())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to delete data." << query.lastError();
-#endif
+        qWarning() << "Error: Failed to delete data." << query.lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to delete data.").arg(query.lastError().text()));
         return false;
     }
 
@@ -277,9 +268,8 @@ bool DataManager::deleteAllData(const QString &tableName)
     query.prepare(deleteSql);
     if(!query.exec())
     {
-#ifdef QT_DEBUG
-        qDebug() << "Error: Failed to delete all data." << query.lastError();
-#endif
+        qWarning() << "Error: Failed to delete all data." << query.lastError();
+        Log::getLogger()->LOG_ERROR(QString("Error: Failed to delete all data. %1").arg(query.lastError().text()));
         return false;
     }
 

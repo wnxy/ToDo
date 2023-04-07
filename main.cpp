@@ -5,6 +5,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    Log::getLogger()->init(QCoreApplication::applicationDirPath() + "/log.conf");
+
     MainWindow w;
     w.show();
     return a.exec();

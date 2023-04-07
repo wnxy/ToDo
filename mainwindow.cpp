@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Qt::WindowStaysOnTopHint 窗口总在最上方
     // Qt::FramelessWindowHint 窗口没有边框
     // Qt::Tool | Qt::X11BypassWindowManagerHint 隐藏任务栏显示
+//    this->setWindowFlags(Qt::Tool);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::X11BypassWindowManagerHint);
     this->setWindowIcon(QIcon(":/Images/Resources/Images/sysIcon.ico"));
     this->setAttribute(Qt::WA_TranslucentBackground);
@@ -56,17 +57,23 @@ MainWindow::MainWindow(QWidget *parent)
 
     setParentDesktop(this);
     sysTray = new SystemTray(this);
+    connect(sysTray, &SystemTray::setAppAutoStartSign, this, &MainWindow::setApplicationAutoRun);
 
     initDataObject();
     initNoteWindow();
+    setApplicationAutoRun();
 
     noteEdit = new NoteEdit();
     connect(noteEdit, &NoteEdit::oneNoteFin, this, &MainWindow::showNoteItem);
 
     checkedNoteDisplay = nullptr;
 
+#ifdef QT_DEBUG
     qDebug() << this->isWindow();
     qDebug() << this->size();
+#endif
+    Log::getLogger()->LOG_DEBUG("Debug: MainWindow construct.")
+
 }
 
 MainWindow::~MainWindow()
@@ -74,6 +81,8 @@ MainWindow::~MainWindow()
     clearDataObject();
     delete noteEdit;
     delete ui;
+
+    Log::getLogger()->LOG_DEBUG("Debug: MainWindow destruct.")
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
@@ -97,17 +106,29 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
-    if(this->isPress)
+    if(this->isPress && isToDoMove)
     {
         this->move(event->globalPos() - this->pressPos);
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent *)
+{
+    QApplication::quit();
+    this->close();
+    Log::getLogger()->LOG_DEBUG("Debug: Frameless Window closeEvent.")
 }
 
 void MainWindow::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);  // 反锯齿;
-    painter.setBrush(QBrush(QColor(97, 111, 118, 100)));    // 窗体背景色
+    int r = mainWinBGColor.red();
+    int g = mainWinBGColor.green();
+    int b = mainWinBGColor.blue();
+    int a = mainWinBGAlpha;
+    QColor c = QColor(r, g, b, a);       // 窗体背景色QColor(97, 111, 118, 100)
+    painter.setBrush(QBrush(c));         // 窗体背景色
     painter.setPen(Qt::transparent);
     QRect rect = this->rect();                      // rect为绘制大小
     rect.setWidth(rect.width() - 1);
@@ -117,7 +138,14 @@ void MainWindow::paintEvent(QPaintEvent *event)
     //QPainterPath painterPath;
     //painterPath.addRoundedRect(rect, 15, 15);//15为圆角角度
     //painter.drawPath(painterPath);
+    this->setFont(QFont(fontFamily, fontPointSize, 25));
+    ui->ctlWidget->setStyleSheet(QString("background-color: rgba(%1, %2, %3, %4);")
+                                 .arg(mainWinBGColor.red())
+                                 .arg(mainWinBGColor.green())
+                                 .arg(mainWinBGColor.blue())
+                                 .arg(QString::number(mainWinBGAlpha)));
     QMainWindow::paintEvent(event);
+    Log::getLogger()->LOG_DEBUG("Debug: MainWindow painter.")
 }
 
 void MainWindow::initDataObject()
@@ -126,15 +154,17 @@ void MainWindow::initDataObject()
     if(dataManager->openDatabase())
     {
         // 判断存储待办事项的表是否存在，不存在就创建
-//        if(!dataManager->isTableExist(DATABASE_TABLENAME))
+        if(!dataManager->isTableExist(DATABASE_TABLENAME))
         {
             dataManager->createTable(DATABASE_TABLENAME);
         }
+        Log::getLogger()->LOG_INFO("Info: Create dateManager and open the datebase.")
     }
     else
     {
         QMessageBox::critical(nullptr, "Cannot open database",
                               "Unable to establish a database connection.", QMessageBox::Cancel);
+        Log::getLogger()->LOG_INFO("Info: Failed open the datebase.")
     }
 }
 
@@ -142,6 +172,7 @@ void MainWindow::clearDataObject()
 {
     dataManager->closeDatabase();
     delete dataManager;
+    Log::getLogger()->LOG_INFO("Info: Succeed close database.")
 }
 
 void MainWindow::initNoteWindow()
@@ -155,6 +186,7 @@ void MainWindow::initNoteWindow()
             notes.pop_back();
         }
     }
+    Log::getLogger()->LOG_INFO("Info: Init the TODO win.")
 }
 
 /**
@@ -173,6 +205,7 @@ void MainWindow::addNoteItemData(const Notes &note, NoteDisplay *noteItem)
         noteDisplay->setNoteTitle(note.noteTitle);
         connect(noteDisplay, &NoteDisplay::oneNoteUpdata, this, &MainWindow::updateNoteItem);
         connect(noteDisplay, &NoteDisplay::oneNoteDone, this, &MainWindow::updataNoteState);
+        connect(noteDisplay, &NoteDisplay::oneNoteDeleted, this, &MainWindow::delNoteItem);
 
         ListWidgetItem *item = new ListWidgetItem;
         item->setSizeHint(QSize(48, 48));
@@ -186,12 +219,14 @@ void MainWindow::addNoteItemData(const Notes &note, NoteDisplay *noteItem)
         {
             this->setNoteItemStyle(noteDisplay);
         }
+        Log::getLogger()->LOG_INFO("Info: Add one NoteItem.")
     }
     else              // 更新已有的待办项
     {
         noteItem->setNoteID(note.id);
         noteItem->setNoteTime(note.noteTime);
         noteItem->setNoteTitle(note.noteTitle);
+        Log::getLogger()->LOG_INFO("Info: Updated one NoteItem.")
     }
 }
 
@@ -202,6 +237,36 @@ void MainWindow::setNoteItemStyle(NoteDisplay *noteDisplay)
     noteDisplay->setNoteTime("Done");
     noteDisplay->setNoteEnabled(false);
 //    noteDisplay->setEnabled(false);
+    Log::getLogger()->LOG_INFO("Info: Set NoteItem style.")
+}
+
+void MainWindow::setApplicationAutoRun()
+{
+    /* if auto start for all users
+     * HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+     * else if auto start for current user
+     * HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Run
+     */    
+    QSettings reg("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
+
+    QString appName = QApplication::applicationName();
+
+    if (autoStart)
+    {
+        QString strAppPath = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+        strAppPath.replace(".exe", ".lnk");
+        if(!QFile::exists(strAppPath))
+        {
+            QFile::link(QCoreApplication::applicationFilePath(), appName + ".lnk");
+        }
+        reg.setValue(appName, strAppPath);
+        Log::getLogger()->LOG_INFO("Info: Set TODO auto run on computer start.")
+    }
+    else
+    {
+        reg.remove(appName);
+        Log::getLogger()->LOG_INFO("Info: Cancel TODO auto run on computer start.")
+    }
 }
 
 /**
@@ -218,6 +283,7 @@ void MainWindow::showNoteItem(Notes note)
 #ifdef QT_DEBUG
         qDebug() << "Debug: Add new note data.";
 #endif
+        Log::getLogger()->LOG_INFO("Info: Add new note data.")
     }
     else             // 更新待办事项，将内容更新到数据库
     {
@@ -228,7 +294,7 @@ void MainWindow::showNoteItem(Notes note)
 #ifdef QT_DEBUG
         qDebug() << "Debug: Update note data.";
 #endif
-
+        Log::getLogger()->LOG_INFO("Info: Update note data.")
     }
 //    ui->addToBeDone->setEnabled(true);
 }
@@ -246,6 +312,7 @@ void MainWindow::updateNoteItem(int noteID, NoteDisplay *noteDisplay)
     QPoint pos(this->geometry().x() + 9, this->geometry().y() + this->geometry().height() / 2 - 45);
     noteEdit->setNoteEdit(note);
     noteEdit->showNoteEdit(pos);
+    Log::getLogger()->LOG_INFO("Info: Updated note context.")
 }
 
 /**
@@ -264,6 +331,16 @@ void MainWindow::updataNoteState(int noteID, NoteDisplay *noteDisplay)
 #ifdef QT_DEBUG
     qDebug() << "QDebug: Update note state.";
 #endif
+    Log::getLogger()->LOG_INFO("Info: Marked note is completed.")
+}
+
+void MainWindow::delNoteItem(int noteID, NoteDisplay *noteDisplay)
+{
+    dataManager->deleteData(DATABASE_TABLENAME, noteID);
+    QListWidgetItem *item = noteDisplay->getListWidgetItem();
+    delete item;
+    ui->toDoList->sortItems();
+    Log::getLogger()->LOG_INFO("Info: Delete one note.")
 }
 
 /**
@@ -277,6 +354,7 @@ void MainWindow::on_addToBeDone_clicked()
     noteEdit->showNoteEdit(pos);
 
 //    ui->addToBeDone->setEnabled(false);
+    Log::getLogger()->LOG_INFO("Info: Add one new note.")
 }
 //void MainWindow::on_addToBeDone_clicked()
 //{
@@ -288,6 +366,7 @@ void MainWindow::on_addToBeDone_clicked()
 //}
 
 
+void MainWindow::on_pushButton_clicked()
+{
 
-
-
+}

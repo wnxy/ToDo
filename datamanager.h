@@ -30,7 +30,7 @@ public:
     bool deleteAllData(const QString &tableName);
 
 private:
-    QSqlDatabase *notesDatabase;         // 被操作的数据库对象
+    static QSqlDatabase *notesDatabase;         // 被操作的数据库对象
 };
 
 #endif // DATAMANAGER_H

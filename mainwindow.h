@@ -4,10 +4,20 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QMessageBox>
+#include <QSettings>
+#include <QDir>
 
 #include "systemtray.h"
 #include "datamanager.h"
 #include "customitem.h"
+#include "log.h"
+
+// 测试
+#include "log4qt/logger.h"
+#include "log4qt/loggerrepository.h"
+#include "log4qt/logmanager.h"
+#include "log4qt/fileappender.h"
+#include "log4qt/ttcclayout.h"
 
 #ifdef Q_OS_WIN
 #ifdef __cplusplus
@@ -52,11 +62,14 @@ public:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    void closeEvent(QCloseEvent *);
 
 public slots:
     void showNoteItem(Notes);
     void updateNoteItem(int, NoteDisplay *);            // 更新待办事项内容
     void updataNoteState(int, NoteDisplay *);           // 更新待办事项 完成/未完成
+    void delNoteItem(int, NoteDisplay *);               // 删除选定的待办事项
+    void setApplicationAutoRun();
 
 private:
     void paintEvent(QPaintEvent *);
@@ -68,6 +81,8 @@ private:
 
 private slots:
     void on_addToBeDone_clicked();
+
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

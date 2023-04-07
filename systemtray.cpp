@@ -39,10 +39,41 @@ void SystemTray::onIconActivated(QSystemTrayIcon::ActivationReason reason)
  */
 void SystemTray::onSysSetWindow()
 {
-    sysSetWin = new SysSetWindow();
+    sysSetWin = new SysSetWindow(this->pWidget);
+    connect(sysSetWin, &SysSetWindow::isActcheckBoxStateChanged, this, &SystemTray::setAppAutoStart);
 
 #ifdef QT_DEBUG
     qDebug() << "System setup.";
+#endif
+}
+
+/**
+ * @brief SystemTray::onInforState
+ * 软件帮助与更新响应函数
+ */
+void SystemTray::onInforState()
+{
+    inforWin = new InforState(this->pWidget);
+    int ret = inforWin->exec();
+    if(ret == QDialog::Accepted)
+    {
+        QDesktopServices::openUrl(QUrl(QString("https://www.baidu.com")));
+    }
+    else if(ret == QDialog::Rejected)
+    {
+
+    }
+}
+
+/**
+ * @brief SystemTray::setAppAutoStart
+ * 设置系统开机自启动
+ */
+void SystemTray::setAppAutoStart()
+{
+    emit setAppAutoStartSign();
+#ifdef QT_DEBUG
+    qDebug() << "SystemTray emit setAppAutoStartSign.";
 #endif
 }
 
@@ -71,16 +102,18 @@ void SystemTray::addSysTrayMenu()
     sysMenu = new QMenu(pWidget);
     setAction = new QAction(tr("设置"), sysMenu);
     infoAction = new QAction(tr("帮助与更新"), sysMenu);
-    aboutAction = new QAction(tr("关于"), sysMenu);
+//    aboutAction = new QAction(tr("关于"), sysMenu);
     quitAction = new QAction(tr("退出"), sysMenu);
 
     sysMenu->addAction(setAction);
     sysMenu->addAction(infoAction);
-    sysMenu->addAction(aboutAction);
+//    sysMenu->addAction(aboutAction);
     sysMenu->addAction(quitAction);
 
     // 系统设置
     connect(setAction, &QAction::triggered, this, &SystemTray::onSysSetWindow);
+    // 帮助与更新
+    connect(infoAction, &QAction::triggered, this, &SystemTray::onInforState);
     // 退出
     connect(quitAction, &QAction::triggered, [this](bool){
         this->pWidget->close();

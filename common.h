@@ -7,10 +7,23 @@
 #include <QPainter>
 #include <QScrollBar>
 #include <QFile>
+#include <QColor>
+
+#include "log.h"
 
 const QString DATABASE_CONNECTTIONNAME = QString("qt_sql_notes_connection");
 const QString DATABASE_NAME = QString("NotesDatabase.db");
 const QString DATABASE_TABLENAME = QString("NotesData");
+
+extern volatile bool isToDoMove;              // 标志电子便签是否可移动
+extern volatile bool autoStart;               // 标志程序是否设置开机自启动
+extern QColor noteFontColor;                  // 待办事项字体颜色
+extern QColor mainWinBGColor;                 // 主界面窗口背景颜色
+extern QColor noteEditBGColor;                // 待办事项编辑区域背景颜色
+extern QString fontFamily;                    // 字体
+extern int fontPointSize;                     // 字号
+extern int mainWinBGAlpha;                    // 主界面窗口背景透明度
+extern int noteEditBGAlpha;                   // 待办事项编辑区域背景透明度
 
 /**
  * @brief The Notes struct
@@ -78,5 +91,23 @@ QString getCurrentDate(const char &delim);
  * @return
  */
 bool compare(const QString &str1, const QString &str2);
+
+/**
+ * @brief alphaToOpacity
+ * QColor中的alpha通道转换为透明度百分比opacity
+ * alpha:0-255, 0表示完全透明 255表示完全不透明
+ * opacity:0-100, 0表示完全不透明 100表示完全透明
+ * @param a alpha通道
+ * @return
+ */
+int alphaToOpacity(int a);
+
+/**
+ * @brief opacityToAlpha
+ * 透明度百分比opacity转换为QColor中的alpha通道
+ * @param opacity 透明度百分比
+ * @return
+ */
+int opacityToAlpha(int opacity);
 
 #endif // COMMON_H

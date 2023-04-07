@@ -10,6 +10,18 @@
     <height>450</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>380</width>
+    <height>450</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>我的小本子</string>
   </property>
@@ -65,24 +77,26 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="fixButton">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="Resources.qrc">
-           <normaloff>:/Images/Resources/Images/fix.svg</normaloff>:/Images/Resources/Images/fix.svg</iconset>
-         </property>
-         <property name="iconSize">
+        <widget class="QLabel" name="label">
+         <property name="minimumSize">
           <size>
            <width>20</width>
            <height>20</height>
           </size>
          </property>
-         <property name="flat">
+         <property name="maximumSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="Resources.qrc">:/Images/Resources/Images/fix.svg</pixmap>
+         </property>
+         <property name="scaledContents">
           <bool>true</bool>
          </property>
         </widget>
@@ -258,7 +272,8 @@ QScrollBar::sub-page:vertical
          </property>
          <property name="icon">
           <iconset resource="Resources.qrc">
-           <normaloff>:/Images/Resources/Images/addNote.svg</normaloff>:/Images/Resources/Images/addNote.svg</iconset>
+           <normaloff>:/Images/Resources/Images/addNote.svg</normaloff>
+           <normalon>:/Images/Resources/Images/addNote.svg</normalon>:/Images/Resources/Images/addNote.svg</iconset>
          </property>
          <property name="iconSize">
           <size>

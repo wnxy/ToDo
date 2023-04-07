@@ -84,9 +84,11 @@ private:
 
 private slots:
     void finToBeDone();                           // 待办事项完成
+    void delToBeDone();                           // 删除选定的待办事项
 
 signals:
     void oneNoteUpdata(int, NoteDisplay *);
+    void oneNoteDeleted(int, NoteDisplay *);      // 删除一条待办事项
     void oneNoteDone(int, NoteDisplay *);         // 待办事项是否完成
 
 private:

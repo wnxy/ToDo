@@ -4,7 +4,7 @@ NoteEdit::NoteEdit(QWidget *parent) : QWidget(parent)
 {
     ctlWidget = new QWidget(this);
     noteEditArea = new QTextEdit(this);
-    noteEditArea->setFont(QFont("Microsoft YaHei UI", 10, 25));
+//    noteEditArea->setFont(QFont("Microsoft YaHei UI", 10, 25));
     noteEditArea->setStyleSheet("background: transparent;border-width:0;border-style:outset;");
     this->setStyle(":/Resources/Qss/ScrollBarStyle.qss");          // 设置待办事项编辑区域滚动条样式
 
@@ -85,7 +85,12 @@ void NoteEdit::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);      // 反锯齿;
-    painter.setBrush(QBrush(QColor(200, 207, 210)));    // 窗体背景色
+    int r = noteEditBGColor.red();
+    int g = noteEditBGColor.green();
+    int b = noteEditBGColor.blue();
+    int a = noteEditBGAlpha;
+    QColor c = QColor(r, g, b, a);       // 窗体背景色QColor(200, 207, 210)
+    painter.setBrush(QBrush(c));    // 窗体背景色
     painter.setPen(Qt::transparent);
     QRect rect = this->rect();                          // rect为绘制大小
     rect.setWidth(rect.width() - 1);
@@ -95,6 +100,8 @@ void NoteEdit::paintEvent(QPaintEvent *event)
     //QPainterPath painterPath;
     //painterPath.addRoundedRect(rect, 15, 15);         //15为圆角角度
     //painter.drawPath(painterPath);
+    this->noteEditArea->setFont(QFont(fontFamily, fontPointSize, 25));
+    this->noteEditArea->setTextColor(noteFontColor);
     QWidget::paintEvent(event);
 }
 
@@ -117,7 +124,10 @@ void NoteEdit::onFinBtnCheck()
 //    emit oneNoteFin(*(note.data()));
     if(note->empty())
     {
+#ifdef QT_DEBUG
         qDebug() << "QDebug: New note.";
+#endif
+        Log::getLogger()->LOG_DEBUG("Debug: New note is empty.")
     }
     note->noteContext = this->noteEditArea->toPlainText();
     note->noteTime = this->timeLabel->text();
@@ -186,6 +196,7 @@ NoteDisplay::NoteDisplay(QWidget *parent) : QWidget(parent)
     isDone = false;
     item = nullptr;
     connect(selectedBtn, &QPushButton::clicked, this, &NoteDisplay::finToBeDone);
+    connect(delBtn, &QPushButton::clicked, this, &NoteDisplay::delToBeDone);
 }
 
 NoteDisplay::~NoteDisplay()
@@ -195,18 +206,24 @@ NoteDisplay::~NoteDisplay()
 
 void NoteDisplay::mousePressEvent(QMouseEvent *event)
 {
-    if(event->button() == Qt::LeftButton)
+    if(!isDone)
     {
-        setCursor(Qt::PointingHandCursor);      // 设置光标样式
+        if(event->button() == Qt::LeftButton)
+        {
+            setCursor(Qt::PointingHandCursor);      // 设置光标样式
+        }
     }
 }
 
 void NoteDisplay::mouseReleaseEvent(QMouseEvent *event)
 {
-    if(event->button() == Qt::LeftButton)
+    if(!isDone)
     {
-        setCursor(Qt::ArrowCursor);               // 设置光标样式
-        emit oneNoteUpdata(this->noteID, this);   // 待办事项更新信号
+        if(event->button() == Qt::LeftButton)
+        {
+            setCursor(Qt::ArrowCursor);               // 设置光标样式
+            emit oneNoteUpdata(this->noteID, this);   // 待办事项更新信号
+        }
     }
 }
 
@@ -237,9 +254,12 @@ void NoteDisplay::setNoteStyle(const QString &style)
     this->lineEdit->setStyleSheet(style);
 }
 
-void NoteDisplay::setNoteEnable(bool flag)
+void NoteDisplay::setNoteEnabled(bool flag)
 {
-    this->editWidget->setEnabled(flag);
+//    this->editWidget->setEnabled(flag);
+    this->selectedBtn->setEnabled(flag);
+    this->lineEdit->setEnabled(flag);
+    this->timeLabel->setEnabled(flag);
 }
 
 void NoteDisplay::setListWidgetItem(QListWidgetItem *item)
@@ -252,21 +272,16 @@ QListWidgetItem* NoteDisplay::getListWidgetItem()
     return this->item;
 }
 
-//void NoteDisplay::setNoteDegree(const int &degree)
-//{
-//    this->degree = degree;
-//}
-
-//int NoteDisplay::getNoteDegree()
-//{
-//    return this->degree;
-//}
-
 void NoteDisplay::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);  // 反锯齿;
-    painter.setBrush(QBrush(QColor(200, 207, 210, 100)));    // 窗体背景色
+    int r = noteEditBGColor.red();
+    int g = noteEditBGColor.green();
+    int b = noteEditBGColor.blue();
+    int a = mainWinBGAlpha;
+    QColor c = QColor(r, g, b, a);       // 窗体背景色QColor(200, 207, 210, 100)
+    painter.setBrush(QBrush(c));    // 窗体背景色
     painter.setPen(Qt::transparent);
     QRect rect = this->rect();                      // rect为绘制大小
     rect.setWidth(rect.width() - 1);
@@ -291,8 +306,6 @@ bool NoteDisplay::eventFilter(QObject *obj, QEvent *event)
 # ifdef QT_DEBUG
             qDebug() << "Debug: NoteDisplay mouse hover.";
 #endif
-//            QPushButton *delBtn = new QPushButton(this);
-//            delBtn->setText("删除");
             delBtn->setVisible(true);
             return true;
         }
@@ -319,9 +332,20 @@ void NoteDisplay::finToBeDone()
 ////        this->lineEdit->setStyleSheet("background: transparent;border-width:0;border-style:outset;text-decoration:none;");
 ////        emit oneNoteDone(this->noteID, false);
 ////    }
+#ifdef QT_DEBUG
     qDebug() << "QDebug: finToBeDone state is changed.";
+#endif
 
     emit oneNoteDone(this->noteID, this);
+}
+
+void NoteDisplay::delToBeDone()
+{
+#ifdef QT_DEBUG
+    qDebug() << "Debug: delete a note.";
+#endif
+
+    emit oneNoteDeleted(this->noteID, this);
 }
 
 CustomItem::CustomItem(QWidget *parent, bool flag) : QWidget(parent)
@@ -365,7 +389,9 @@ CustomItem::CustomItem(QWidget *parent, bool flag) : QWidget(parent)
         this->ctlWidget->setVisible(false);
     }
 
+#ifdef QT_DEBUG
     qDebug() << "CustomItem size:" << this->size();
+#endif
 }
 
 CustomItem::~CustomItem()
@@ -410,7 +436,9 @@ void CustomItem::onFinBtnCheck()
     this->setFixedSize(QSize(380, 30));
     this->notesEditArea->setEnabled(false);         // 自定义Item收起时，禁止编辑文本区域
 
+#ifdef QT_DEBUG
    qDebug() << "CustomItem fix size:" << this->size();
+#endif
 }
 
 void CustomItem::changeFinBtnAct()

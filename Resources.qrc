@@ -11,6 +11,8 @@
         <file>Resources/Images/unselected.svg</file>
         <file>Resources/Images/fix.svg</file>
         <file>Resources/Images/delete.svg</file>
+        <file>Resources/Images/reduceNote.svg</file>
+        <file>Resources/Images/addNote_hover.svg</file>
     </qresource>
     <qresource prefix="/Qss"/>
     <qresource prefix="/">
